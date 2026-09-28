@@ -16,6 +16,17 @@ Welcome to the **School Automated Report Card System**. This tool simplifies the
 
 ---
 
+## 📸 Screenshots
+
+### Standard Report
+![Standard Report](standard-report-ss.png)
+
+### Annual Report
+![Annual Report - Front & Back Covers](anual-ss.png)
+![Annual Report - Inside Pages](annual-ss-2.png)
+
+---
+
 ## 🚀 Quick Start (For Windows Users)
 
 The absolute easiest way to run the application is to use the included batch file.
