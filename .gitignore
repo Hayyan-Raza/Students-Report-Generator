@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
+.env
+
+# Generated PDFs
+*.pdf
+
+# Excel and JSON data files
+*.xlsx
+*.xls
+*.csv
+parsed_excel.json
+
+# User specified ignores
+assets/
+n8nCodeNode.js
+oldn8nCodenode/
+temp_parser/
