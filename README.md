@@ -1,6 +1,6 @@
-# 🎓 KCS Report Generator
+# 🎓 Report Generator
 
-Welcome to the **Kent City School Automated Report Card System**. This tool simplifies the process of generating both Standard and Annual student report cards. By simply uploading an Excel data file, the application parses the student grades, evaluates performance, and outputs pixel-perfect PDF reports—all neatly packaged into a `.zip` file for instant download.
+Welcome to the **School Automated Report Card System**. This tool simplifies the process of generating both Standard and Annual student report cards. By simply uploading an Excel data file, the application parses the student grades, evaluates performance, and outputs pixel-perfect PDF reports—all neatly packaged into a `.zip` file for instant download.
 
 ---
 
