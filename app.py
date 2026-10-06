@@ -52,10 +52,8 @@ def generate_reports():
     try:
         # 1. Parse form fields
         session_label = request.form.get('session', '2024-2025')
-        grade = request.form.get('grade', 'IV')
         semester = request.form.get('semester', 'First Semester')
         campus = request.form.get('campus', 'Zaman Town')
-        section = request.form.get('section', '')
         
         # 2. Parse Excel
         excel_file = request.files['excel_file']
@@ -65,9 +63,7 @@ def generate_reports():
             return "Excel file is empty or invalid.", 400
             
         # 3. Process Data
-        processor = DataProcessor(raw_data, fallback_grade=grade)
-        if section:
-            processor.config['section'] = section
+        processor = DataProcessor(raw_data, fallback_grade='')
         if campus:
             processor.config['campus'] = campus
             
@@ -77,22 +73,36 @@ def generate_reports():
         with zipfile.ZipFile(memory_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
             for cid, student_data in processor.students.items():
                 sanitized_name = str(student_data.get('name', 'Unknown')).replace("/", "-")
+                safe_grade_level = str(processor.config.get('gradeLevel', '')).strip().upper()
+                class_4_to_8_tokens = ['IV', 'V', 'VI', 'VII', 'VIII', '4', '5', '6', '7', '8']
+                is_class_4_to_8 = any(
+                    safe_grade_level == t or 
+                    f"CLASS {t}" in safe_grade_level or 
+                    f"GRADE {t}" in safe_grade_level or 
+                    safe_grade_level.endswith(f" {t}") 
+                    for t in class_4_to_8_tokens
+                )
                 
-                # Standard Report
-                std_report = StandardReport(student_data, processor.config, session_label, semester)
-                std_pdf_stream = io.BytesIO()
-                std_report.build(std_pdf_stream)
-                std_pdf_stream.seek(0)
-                zf.writestr(f"Standard_Report_{cid}_{sanitized_name}.pdf", std_pdf_stream.read())
+                semester_clean = semester.lower()
+                is_fourth_term = (
+                    'fourth' in semester_clean or 
+                    'final' in semester_clean or 
+                    'annual' in semester_clean or 
+                    '4th' in semester_clean
+                )
                 
-                # Annual Report (if it's an annual evaluation, or we generate both?)
-                # We'll just generate both for now, or you can add logic to only generate based on selection.
-                # Usually standard for semester, booklet for Annual. Let's do both so user has them.
-                ann_report = AnnualReport(student_data, processor.config, session_label, semester)
-                ann_pdf_stream = io.BytesIO()
-                ann_report.build(ann_pdf_stream)
-                ann_pdf_stream.seek(0)
-                zf.writestr(f"Annual_Report_{cid}_{sanitized_name}.pdf", ann_pdf_stream.read())
+                if is_class_4_to_8 and is_fourth_term:
+                    ann_report = AnnualReport(student_data, processor.config, session_label, semester)
+                    ann_pdf_stream = io.BytesIO()
+                    ann_report.build(ann_pdf_stream)
+                    ann_pdf_stream.seek(0)
+                    zf.writestr(f"Annual_Report_{cid}_{sanitized_name}.pdf", ann_pdf_stream.read())
+                else:
+                    std_report = StandardReport(student_data, processor.config, session_label, semester)
+                    std_pdf_stream = io.BytesIO()
+                    std_report.build(std_pdf_stream)
+                    std_pdf_stream.seek(0)
+                    zf.writestr(f"Standard_Report_{cid}_{sanitized_name}.pdf", std_pdf_stream.read())
                 
         memory_zip.seek(0)
         
@@ -100,7 +110,7 @@ def generate_reports():
             memory_zip,
             mimetype='application/zip',
             as_attachment=True,
-            download_name=f"Reports_{grade}_{section}_{semester}.zip"
+            download_name=f"Reports_{processor.config.get('gradeLevel', 'Class')}_{processor.config.get('section', '')}_{semester}.zip"
         )
         
     except Exception as e:

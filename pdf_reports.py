@@ -90,13 +90,38 @@ class BasePdfReport:
         self.session_label = session_label
         self.target_semester = target_semester
         
-        if self.target_semester in self.student.get("terms", {}):
-            self.term_data = self.student["terms"][self.target_semester]
-        else:
-            if self.student.get("terms"):
-                self.term_data = list(self.student["terms"].values())[-1]
+        def find_matching_term(target, possible_terms):
+            if not possible_terms: return target
+            clean = lambda t: "".join(c for c in str(t).lower() if c.isalnum())
+            target_clean = clean(target)
+            
+            for t in possible_terms:
+                if clean(t) == target_clean: return t
+                
+            if any(kw in target_clean for kw in ['fourth', 'annual', 'final', '4th']):
+                for t in possible_terms:
+                    tc = clean(t)
+                    if any(kw in tc for kw in ['annual', 'fourth', 'final', '4th']): return t
+                    
+            prefixes = ['first', 'second', 'third', 'fourth', '1st', '2nd', '3rd', '4th']
+            for prefix in prefixes:
+                if prefix in target_clean:
+                    for t in possible_terms:
+                        if prefix in clean(t): return t
+                        
+            for t in possible_terms:
+                tc = clean(t)
+                if tc in target_clean or target_clean in tc: return t
+            return target
+            
+        if self.student.get("terms"):
+            matched_term = find_matching_term(self.target_semester, list(self.student["terms"].keys()))
+            if matched_term in self.student["terms"]:
+                self.term_data = self.student["terms"][matched_term]
             else:
-                self.term_data = {}
+                self.term_data = list(self.student["terms"].values())[-1]
+        else:
+            self.term_data = {}
 
         self.LAYOUT = {
             "margin": 50,
@@ -199,12 +224,12 @@ class BasePdfReport:
                 if campus == "Zaman Town":
                     svg_str = f'<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="{ZAMAN_SVG_PATH}" fill="black" /></svg>'
                     scale = 0.60 if not is_booklet else (0.35 if label3 else 0.26)
-                    y_offset = -5 if not is_booklet else 5
+                    y_offset = -35 if not is_booklet else -25
                     x_offset = 25 if not is_booklet else 10
                 else:
                     svg_str = f'<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg"><path d="{OTHER_SVG_PATH}" fill="black" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" /></svg>'
                     scale = 0.40 if not is_booklet else (0.24 if label3 else 0.15)
-                    y_offset = 0 if not is_booklet else 5
+                    y_offset = -30 if not is_booklet else -25
                     x_offset = 20 if not is_booklet else 5
                 
                 try:
