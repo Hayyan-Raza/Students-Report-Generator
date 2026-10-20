@@ -17,6 +17,7 @@ app = Flask(
     static_url_path='/assets',
     template_folder=os.path.join(BASE_DIR, 'templates')
 )
+app.url_map.strict_slashes = False
 
 def excel_to_raw_data(file_stream):
     wb = openpyxl.load_workbook(file_stream, data_only=True)
@@ -51,6 +52,7 @@ def excel_to_raw_data(file_stream):
     return raw_data
 
 @app.route('/')
+@app.route('/api/index')
 def index():
     return render_template('index.html')
 
