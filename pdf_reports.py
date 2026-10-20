@@ -273,7 +273,7 @@ class StandardReport(BasePdfReport):
         current_y = 120 
 
         c.setFont("Helvetica-Bold", 16)
-        title = f"{self.target_semester.upper()} AGGREGATE"
+        title = f"{self.target_semester.upper().replace('SEMESTER', 'TERM')} AGGREGATE"
         title_w = c.stringWidth(title, "Helvetica-Bold", 16)
         c.drawString((page_width - title_w) / 2, current_y, title)
         current_y += 15
@@ -466,7 +466,7 @@ class StandardReport(BasePdfReport):
             current_y += 14
         
         current_y += 60
-        self.draw_signatures(c, current_y, "Class Teacher's Signature", "Incharge's Signature", "Principal's Signature")
+        self.draw_signatures(c, current_y, "Class Teacher's Signature", "Principal's Signature", "Incharge's Signature")
 
         c.save()
 
