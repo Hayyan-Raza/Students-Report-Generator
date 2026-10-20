@@ -1,0 +1,22 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+
+# Screenshots and documentation media
+annual-ss-2.png
+anual-ss.png
+standard-report-ss.png
+
+# Local development and test files
+test_run.py
+parsed_excel.json
+InputExcel.xlsx
+New Excel.xlsx
+Start_App.bat
+n8nCodeNode.js
+
+# Git metadata
+.git
+.gitignore

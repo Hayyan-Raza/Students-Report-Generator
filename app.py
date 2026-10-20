@@ -9,7 +9,14 @@ import openpyxl
 from grading_engine_processor import DataProcessor
 from pdf_reports import StandardReport, AnnualReport
 
-app = Flask(__name__, static_folder='assets', static_url_path='/assets')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    static_folder=os.path.join(BASE_DIR, 'assets'),
+    static_url_path='/assets',
+    template_folder=os.path.join(BASE_DIR, 'templates')
+)
 
 def excel_to_raw_data(file_stream):
     wb = openpyxl.load_workbook(file_stream, data_only=True)
@@ -124,7 +131,8 @@ def open_browser():
 @app.route('/download-template')
 def download_template():
     try:
-        return send_file('Template_For_Schools_Report_Generation.xlsx', as_attachment=True)
+        template_path = os.path.join(BASE_DIR, 'Template_For_Schools_Report_Generation.xlsx')
+        return send_file(template_path, as_attachment=True)
     except Exception as e:
         return f"Template file not found: {str(e)}", 404
 
