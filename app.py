@@ -65,6 +65,8 @@ def generate_reports():
         campus = request.form.get('campus', 'Zaman Town')
         
         # 2. Parse Excel
+        if 'excel_file' not in request.files or not request.files['excel_file'].filename:
+            return "Please upload a valid Excel file.", 400
         excel_file = request.files['excel_file']
         raw_data = excel_to_raw_data(excel_file)
         
