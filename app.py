@@ -52,7 +52,6 @@ def excel_to_raw_data(file_stream):
     return raw_data
 
 @app.route('/')
-@app.route('/api/index')
 def index():
     return render_template('index.html')
 

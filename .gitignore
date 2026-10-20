@@ -16,13 +16,13 @@ ENV/
 *.pdf
 
 # Excel and JSON data files
-*.xlsx
-*.xls
-*.csv
+InputExcel.xlsx
+New Excel.xlsx
 parsed_excel.json
 
 # User specified ignores
-assets/
 n8nCodeNode.js
 oldn8nCodenode/
 temp_parser/
+
+.vercel
