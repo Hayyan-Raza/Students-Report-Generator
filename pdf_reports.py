@@ -231,7 +231,7 @@ class BasePdfReport:
                 else:
                     svg_str = f'<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg"><path d="{OTHER_SVG_PATH}" fill="black" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" /></svg>'
                     scale = 0.40 if not is_booklet else (0.24 if label3 else 0.15)
-                    y_offset = -30 if not is_booklet else -25
+                    y_offset = -12 if not is_booklet else -25
                     x_offset = 20 if not is_booklet else 5
                 
                 try:
@@ -427,16 +427,11 @@ class StandardReport(BasePdfReport):
         right_edge = self.LAYOUT["rightEdge"]
         right_col_start_x = right_edge - 210
 
-        # Line 1: Overall Percentage & Grade
+        # Line 1: Overall Result
         c.setFont("Helvetica-Bold", 10)
-        c.drawString(left_x, current_y, "Overall Percentage:")
+        c.drawString(left_x, current_y, "Overall Result:")
         c.setFont("Helvetica", 10)
-        c.drawString(left_x + 130, current_y, display_overall_percent)
-        
-        c.setFont("Helvetica-Bold", 10)
-        c.drawString(right_col_start_x, current_y, "Overall Grade:")
-        c.setFont("Helvetica", 10)
-        c.drawString(right_col_start_x + 95, current_y, display_overall_grade)
+        c.drawString(left_x + 95, current_y, display_overall_grade)
         
         current_y += 18
         
@@ -466,7 +461,7 @@ class StandardReport(BasePdfReport):
             current_y += 14
         
         current_y += 60
-        self.draw_signatures(c, current_y, "Class Teacher's Signature", "Principal's Signature", "Incharge's Signature")
+        self.draw_signatures(c, current_y, "Class Teacher's Signature", "Principal's Signature")
 
         c.save()
 
