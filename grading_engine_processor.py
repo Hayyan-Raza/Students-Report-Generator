@@ -130,7 +130,7 @@ class DataProcessor:
             "section": "Jinnah",
             "totalWorkingDays": 0,
             "cidKey": None, "nameKey": None, "fatherKey": None, "termKey": None, "attendedDaysKey": None,
-            "totalWorkingDaysKey": None, "rankKey": None, "promotionRemarksKey": None,
+            "totalWorkingDaysKey": None, "rankKey": None, "promotionRemarksKey": None, "resultKey": None,
             "subjectMap": {},
             "evaluationMap": {}
         }
@@ -176,6 +176,7 @@ class DataProcessor:
                 elif val == "Total Working Days": self.config["totalWorkingDaysKey"] = key
                 elif val == "Rank": self.config["rankKey"] = key
                 elif val == "Promotion Remarks": self.config["promotionRemarksKey"] = key
+                elif val == "Result": self.config["resultKey"] = key
                 elif isinstance(val, str):
                     trimmed_val = val.strip()
                     if trimmed_val:
