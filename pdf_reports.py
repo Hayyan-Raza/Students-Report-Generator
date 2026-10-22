@@ -340,6 +340,7 @@ class StandardReport(BasePdfReport):
         total_max_marks = 800
         has_failed = False
         has_absent_4_to_8 = False
+        has_any_absent = False
 
         for key, subject_name in self.config.get("subjectMap", {}).items():
             if "project" in subject_name.lower():
@@ -356,7 +357,9 @@ class StandardReport(BasePdfReport):
                 grade = "-"
                 
                 is_exempt = isinstance(subject_val, str) and subject_val.upper() in ("EXEMPT", "EXCUSED")
-                is_absent = isinstance(subject_val, str) and subject_val.upper() == "ABSENT"
+                is_absent = isinstance(subject_val, str) and subject_val.upper() in ("ABSENT", "AB")
+                if is_absent:
+                    has_any_absent = True
 
                 if is_class_4_to_8 and is_exempt:
                     subject_total_display = "EXCUSED"
@@ -420,28 +423,35 @@ class StandardReport(BasePdfReport):
         right_edge = self.LAYOUT["rightEdge"]
         right_col_start_x = right_edge - 210
 
-        # Determine Overall Result: Passed / Absent / Detained
+        # Determine Overall Result: Passed / Absent / Detained / Failed
         overall_result_str = None
-        res_key = self.config.get("resultKey")
-        if res_key and self.term_data.get(res_key):
-            r_raw = str(self.term_data.get(res_key)).strip()
-            r_upper = r_raw.upper()
-            if "PASS" in r_upper:
-                overall_result_str = "Passed"
-            elif "ABSENT" in r_upper or r_upper == "AB":
-                overall_result_str = "Absent"
-            elif "DETAIN" in r_upper or "FAIL" in r_upper:
-                overall_result_str = "Detained"
-            else:
-                overall_result_str = r_raw.title()
 
-        if not overall_result_str:
-            if is_class_4_to_8 and has_absent_4_to_8:
-                overall_result_str = "Absent"
-            elif has_failed or overall_grade == 'U':
-                overall_result_str = "Detained"
-            else:
-                overall_result_str = "Passed"
+        # Rule: jo students absents or failed dono hein to inka result failed hoga
+        if has_any_absent and has_failed:
+            overall_result_str = "Failed"
+        else:
+            res_key = self.config.get("resultKey")
+            if res_key and self.term_data.get(res_key):
+                r_raw = str(self.term_data.get(res_key)).strip()
+                r_upper = r_raw.upper()
+                if "PASS" in r_upper:
+                    overall_result_str = "Passed"
+                elif "ABSENT" in r_upper or r_upper == "AB":
+                    overall_result_str = "Absent"
+                elif "FAIL" in r_upper:
+                    overall_result_str = "Failed"
+                elif "DETAIN" in r_upper:
+                    overall_result_str = "Detained"
+                else:
+                    overall_result_str = r_raw.title()
+
+            if not overall_result_str:
+                if is_class_4_to_8 and has_absent_4_to_8:
+                    overall_result_str = "Absent"
+                elif has_failed or overall_grade == 'U':
+                    overall_result_str = "Failed" if has_any_absent else "Detained"
+                else:
+                    overall_result_str = "Passed"
 
         # Line 1: Overall Result
         c.setFont("Helvetica-Bold", 10)
