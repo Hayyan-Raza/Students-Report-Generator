@@ -426,10 +426,15 @@ class StandardReport(BasePdfReport):
         # Determine Overall Result: Passed / Absent / Detained / Failed
         overall_result_str = None
 
-        # Rule: jo students absents or failed dono hein to inka result failed hoga
-        if has_any_absent and has_failed:
-            overall_result_str = "Failed"
+        # Rule 1: Agar student fail hai (any U grade), result ALWAYS Detained/Failed
+        # (Excel result column ko override karte hain — grades truth hai)
+        if has_failed:
+            if has_any_absent:
+                overall_result_str = "Failed"
+            else:
+                overall_result_str = "Detained"
         else:
+            # Rule 2: Check Excel result column
             res_key = self.config.get("resultKey")
             if res_key and self.term_data.get(res_key):
                 r_raw = str(self.term_data.get(res_key)).strip()
@@ -445,11 +450,12 @@ class StandardReport(BasePdfReport):
                 else:
                     overall_result_str = r_raw.title()
 
+            # Rule 3: Fallback
             if not overall_result_str:
                 if is_class_4_to_8 and has_absent_4_to_8:
                     overall_result_str = "Absent"
-                elif has_failed or overall_grade == 'U':
-                    overall_result_str = "Failed" if has_any_absent else "Detained"
+                elif overall_grade == 'U':
+                    overall_result_str = "Detained"
                 else:
                     overall_result_str = "Passed"
 
