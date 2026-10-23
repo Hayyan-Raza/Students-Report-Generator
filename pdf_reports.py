@@ -404,9 +404,8 @@ class StandardReport(BasePdfReport):
                 else:
                     score = 0 if subject_val in ("ABSENT", "-") else float(subject_val) if str(subject_val).replace('.', '', 1).isdigit() else 0
                     subject_total_display = subject_val
-                    rounded_score = GradingEngine.custom_round(score)
-                    subject_percent_display = f"{rounded_score}%"
-                    grade = GradingEngine.calculate_grade(rounded_score)
+                    subject_percent_display = f"{GradingEngine.custom_round(score)}%"
+                    grade = GradingEngine.calculate_grade(score)
                     grand_total += score
 
                     if grade == 'U':
@@ -744,9 +743,8 @@ class AnnualReport(BasePdfReport):
             else:
                 f_score = 0 if subject_val in ("ABSENT", "-") else float(subject_val) if str(subject_val).replace('.', '', 1).isdigit() else 0
                 subject_total = subject_val if subject_val in ("ABSENT", "-") else f"{f_score:.1f}"
-                rounded_f_score = GradingEngine.custom_round(f_score)
-                subject_percent_display = f"{rounded_f_score}%"
-                grade = GradingEngine.calculate_grade(rounded_f_score)
+                subject_percent_display = f"{GradingEngine.custom_round(f_score)}%"
+                grade = GradingEngine.calculate_grade(f_score)
                 grand_total += f_score
                 
                 if grade == 'U':
