@@ -191,18 +191,22 @@ class DataProcessor:
         for row in self.raw_data:
             term_val = row.get(self.config["termKey"]) if self.config["termKey"] else None
             current_row_cid = row.get(self.config["cidKey"])
-            if current_row_cid and str(current_row_cid).strip().upper() in ('CID', 'CID NO', 'CID NO.', '__EMPTY'):
-                continue
             
-            if current_row_cid:
-                last_cid = current_row_cid
+            clean_cid = str(current_row_cid).strip() if current_row_cid is not None else ""
+            if clean_cid.upper() in ('', 'CID', 'CID NO', 'CID NO.', '__EMPTY', 'NONE', '-', '0', '0.0'):
+                clean_cid = ""
+            
+            if clean_cid:
+                last_cid = clean_cid
                 last_name = row.get(self.config["nameKey"])
                 last_father = row.get(self.config["fatherKey"])
 
             if not last_cid or not term_val:
                 continue
 
-            term_val_clean = term_val.strip()
+            term_val_clean = str(term_val).strip()
+            if not term_val_clean:
+                continue
             
             if last_cid not in self.students:
                 self.students[last_cid] = {

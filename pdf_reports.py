@@ -106,12 +106,19 @@ class BasePdfReport:
                 for t in possible_terms:
                     tc = clean(t)
                     if any(kw in tc for kw in ['annual', 'fourth', 'final', '4th']): return t
-                    
-            prefixes = ['first', 'second', 'third', 'fourth', '1st', '2nd', '3rd', '4th']
-            for prefix in prefixes:
-                if prefix in target_clean:
+
+            ordinal_groups = [
+                ['first', '1st', 'one', '1'],
+                ['second', '2nd', 'two', '2', 'mid'],
+                ['third', '3rd', 'three', '3'],
+                ['fourth', '4th', 'four', '4', 'annual', 'final']
+            ]
+            for group in ordinal_groups:
+                if any(w in target_clean for w in group):
                     for t in possible_terms:
-                        if prefix in clean(t): return t
+                        tc = clean(t)
+                        if any(w in tc for w in group):
+                            return t
                         
             for t in possible_terms:
                 tc = clean(t)
