@@ -9,6 +9,14 @@ class GradingEngine:
         return math.floor(number + 0.5)
 
     @staticmethod
+    def format_percentage(number):
+        if not math.isfinite(number):
+            return "0%"
+        if number % 1 == 0:
+            return f"{int(number)}%"
+        return f"{round(number, 2):g}%"
+
+    @staticmethod
     def calculate_grade(percentage):
         if percentage >= 94.555: return 'A*'
         if percentage >= 89.555: return 'A-1'
