@@ -373,8 +373,9 @@ class StandardReport(BasePdfReport):
                 subject_percent_display = "-"
                 grade = "-"
                 
-                is_exempt = isinstance(subject_val, str) and subject_val.upper() in ("EXEMPT", "EXCUSED")
-                is_absent = isinstance(subject_val, str) and subject_val.upper() in ("ABSENT", "AB")
+                sub_clean = str(subject_val).strip().upper() if subject_val is not None else ""
+                is_exempt = sub_clean in ("EXEMPT", "EXCUSED", "EX", "EXP") or "EXEMPT" in sub_clean or "EXCUSED" in sub_clean
+                is_absent = sub_clean in ("ABSENT", "AB", "A/B", "ABS") or "ABSENT" in sub_clean
                 if is_absent:
                     has_any_absent = True
 
@@ -402,7 +403,7 @@ class StandardReport(BasePdfReport):
                     h = self.draw_grid_row(c, current_y, [subject_name, '100', subject_total_display, subject_percent_display, grade], col_widths, center_first_col=True)
                     current_y += h
                 else:
-                    score = 0 if subject_val in ("ABSENT", "-") else float(subject_val) if str(subject_val).replace('.', '', 1).isdigit() else 0
+                    score = 0 if sub_clean in ("ABSENT", "AB", "A/B", "ABS", "-", "") or "ABSENT" in sub_clean else float(subject_val) if str(subject_val).strip().replace('.', '', 1).isdigit() else 0
                     subject_total_display = subject_val
                     subject_percent_display = GradingEngine.format_percentage(score)
                     grade = GradingEngine.calculate_grade(score)
@@ -445,14 +446,13 @@ class StandardReport(BasePdfReport):
         # Determine Overall Result: Passed / Absent / Detained / Failed
         overall_result_str = None
 
-        if has_any_absent and has_u_grade:
-            # Dono hain: absent bhi aur fail (U grade) bhi
+        if has_u_grade:
+            # Pass + fail = failed
+            # Fail + Absent = Failed
+            # Failed + Excused = Failed
             overall_result_str = "Failed"
-        elif has_u_grade:
-            # Sirf fail hai (attempted subject mein U grade)
-            overall_result_str = "Detained"
         elif has_any_absent:
-            # Sirf absent hai (koi U grade nahi mila)
+            # Pass + Absent = Absent
             overall_result_str = "Absent"
         else:
             # Rule: Check Excel result column
@@ -464,10 +464,8 @@ class StandardReport(BasePdfReport):
                     overall_result_str = "Passed"
                 elif "ABSENT" in r_upper or r_upper == "AB":
                     overall_result_str = "Absent"
-                elif "FAIL" in r_upper:
+                elif "FAIL" in r_upper or "DETAIN" in r_upper:
                     overall_result_str = "Failed"
-                elif "DETAIN" in r_upper:
-                    overall_result_str = "Detained"
                 else:
                     overall_result_str = r_raw.title()
 
@@ -476,7 +474,7 @@ class StandardReport(BasePdfReport):
                 if is_class_4_to_8 and has_absent_4_to_8:
                     overall_result_str = "Absent"
                 elif overall_grade == 'U':
-                    overall_result_str = "Detained"
+                    overall_result_str = "Failed"
                 else:
                     overall_result_str = "Passed"
 
@@ -715,8 +713,9 @@ class AnnualReport(BasePdfReport):
             subject_percent_display = "-"
             grade = "-"
             
-            is_exempt = isinstance(subject_val, str) and subject_val.upper() in ("EXEMPT", "EXCUSED")
-            is_absent = isinstance(subject_val, str) and subject_val.upper() in ("ABSENT", "AB")
+            sub_clean = str(subject_val).strip().upper() if subject_val is not None else ""
+            is_exempt = sub_clean in ("EXEMPT", "EXCUSED", "EX", "EXP") or "EXEMPT" in sub_clean or "EXCUSED" in sub_clean
+            is_absent = sub_clean in ("ABSENT", "AB", "A/B", "ABS") or "ABSENT" in sub_clean
 
             if is_class_4_to_8 and is_exempt:
                 subject_total = "EXCUSED"
@@ -741,7 +740,7 @@ class AnnualReport(BasePdfReport):
                 h = self.draw_grid_row(c, current_y, [subject_name, '100', subject_val, subject_total, subject_percent_display, grade], p3_cols)
                 current_y += h
             else:
-                f_score = 0 if subject_val in ("ABSENT", "-") else float(subject_val) if str(subject_val).replace('.', '', 1).isdigit() else 0
+                f_score = 0 if sub_clean in ("ABSENT", "AB", "A/B", "ABS", "-", "") or "ABSENT" in sub_clean else float(subject_val) if str(subject_val).strip().replace('.', '', 1).isdigit() else 0
                 subject_total = subject_val if subject_val in ("ABSENT", "-") else f"{f_score:.1f}"
                 subject_percent_display = GradingEngine.format_percentage(f_score)
                 grade = GradingEngine.calculate_grade(f_score)
