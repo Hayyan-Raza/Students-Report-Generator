@@ -378,12 +378,13 @@ class StandardReport(BasePdfReport):
                     total_max_marks -= 100
                     h = self.draw_grid_row(c, current_y, [subject_name, '0', subject_total_display, subject_percent_display, grade], col_widths, center_first_col=True)
                     current_y += h
-                elif is_class_4_to_8 and is_absent:
-                    subject_total_display = "ABSENT"
-                    subject_percent_display = "ABSENT"
-                    grade = "ABSENT"
+                elif is_absent:
+                    has_any_absent = True
                     has_absent_4_to_8 = True
                     has_failed = True
+                    subject_total_display = "ABSENT" if is_class_4_to_8 else "Absent"
+                    subject_percent_display = "ABSENT" if is_class_4_to_8 else "-"
+                    grade = "ABSENT" if is_class_4_to_8 else "-"
                     h = self.draw_grid_row(c, current_y, [subject_name, '100', subject_total_display, subject_percent_display, grade], col_widths, center_first_col=True)
                     current_y += h
                 elif is_exempt:
@@ -708,7 +709,7 @@ class AnnualReport(BasePdfReport):
             grade = "-"
             
             is_exempt = isinstance(subject_val, str) and subject_val.upper() in ("EXEMPT", "EXCUSED")
-            is_absent = isinstance(subject_val, str) and subject_val.upper() == "ABSENT"
+            is_absent = isinstance(subject_val, str) and subject_val.upper() in ("ABSENT", "AB")
 
             if is_class_4_to_8 and is_exempt:
                 subject_total = "EXCUSED"
@@ -717,13 +718,13 @@ class AnnualReport(BasePdfReport):
                 total_max_marks -= 100
                 h = self.draw_grid_row(c, current_y, [subject_name, '0', 'EXCUSED', subject_total, subject_percent_display, grade], p3_cols)
                 current_y += h
-            elif is_class_4_to_8 and is_absent:
-                subject_total = "ABSENT"
-                subject_percent_display = "ABSENT"
-                grade = "ABSENT"
+            elif is_absent:
+                subject_total = "ABSENT" if is_class_4_to_8 else "Absent"
+                subject_percent_display = "ABSENT" if is_class_4_to_8 else "-"
+                grade = "ABSENT" if is_class_4_to_8 else "-"
                 has_absent_4_to_8 = True
                 has_failed = True
-                h = self.draw_grid_row(c, current_y, [subject_name, '100', 'ABSENT', subject_total, subject_percent_display, grade], p3_cols)
+                h = self.draw_grid_row(c, current_y, [subject_name, '100', subject_total, subject_total, subject_percent_display, grade], p3_cols)
                 current_y += h
             elif is_exempt:
                 subject_total = "EXEMPT"
