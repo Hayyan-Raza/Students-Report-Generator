@@ -348,6 +348,7 @@ class StandardReport(BasePdfReport):
         grand_total = 0
         total_max_marks = 800
         has_failed = False
+        has_u_grade = False
         has_absent_4_to_8 = False
         has_any_absent = False
 
@@ -401,6 +402,7 @@ class StandardReport(BasePdfReport):
 
                     if grade == 'U':
                         has_failed = True
+                        has_u_grade = True
                     h = self.draw_grid_row(c, current_y, [subject_name, '100', subject_total_display, subject_percent_display, grade], col_widths, center_first_col=True)
                     current_y += h
 
@@ -435,15 +437,17 @@ class StandardReport(BasePdfReport):
         # Determine Overall Result: Passed / Absent / Detained / Failed
         overall_result_str = None
 
-        # Rule 1: Agar student fail hai (any U grade), result ALWAYS Detained/Failed
-        # (Excel result column ko override karte hain — grades truth hai)
-        if has_failed:
-            if has_any_absent:
-                overall_result_str = "Failed"
-            else:
-                overall_result_str = "Detained"
+        if has_any_absent and has_u_grade:
+            # Dono hain: absent bhi aur fail (U grade) bhi
+            overall_result_str = "Failed"
+        elif has_u_grade:
+            # Sirf fail hai (attempted subject mein U grade)
+            overall_result_str = "Detained"
+        elif has_any_absent:
+            # Sirf absent hai (koi U grade nahi mila)
+            overall_result_str = "Absent"
         else:
-            # Rule 2: Check Excel result column
+            # Rule: Check Excel result column
             res_key = self.config.get("resultKey")
             if res_key and self.term_data.get(res_key):
                 r_raw = str(self.term_data.get(res_key)).strip()
@@ -459,7 +463,7 @@ class StandardReport(BasePdfReport):
                 else:
                     overall_result_str = r_raw.title()
 
-            # Rule 3: Fallback
+            # Fallback
             if not overall_result_str:
                 if is_class_4_to_8 and has_absent_4_to_8:
                     overall_result_str = "Absent"
